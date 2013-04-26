@@ -126,7 +126,7 @@
                 results.html('');
                 var val = parseFloat(jQuery('#moneys').val());
                 if ( !is_valid_dollar_amount(val) ) {
-                    results.append('<h3 class="error">Let\'s try to keep this at numerals, okay? Maybe a decimal point.</h3>'     
+                    results.append('<h3 class="error">Let\'s try to keep this at numerals, okay? Maybe a decimal point.</h3>');
                 }
                 var year = year_select.find('option:selected').val();
                 var in_2013_dollars = (val * years_and_adjustment[year])
