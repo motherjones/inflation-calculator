@@ -123,15 +123,23 @@
                 );
             }
             form.on('submit', function() {
-                var year = year_select.find('option:selected').val();
-                var val = parseFloat(jQuery('#moneys').val());
-                var in_2013_dollars = val * years_and_adjustment[year];
                 results.html('');
+                var val = parseFloat(jQuery('#moneys').val());
+                if ( !is_valid_dollar_amount(val) ) {
+                    results.append('<h3 class="error">Let\'s try to keep this at numerals, okay? Maybe a decimal point.</h3>'     
+                }
+                var year = year_select.find('option:selected').val();
+                var in_2013_dollars = (val * years_and_adjustment[year])
+                    .toFixed(2);
                 results.append(jQuery('<h1>$' + val + '</h1>'));
                 results.append(jQuery('<h2>in ' + year + ' dollars</h2>'));
                 results.append(jQuery('<h2>is about <span class="dolars">' +  in_2013_dollars+ ' in 2013 dollars</h2>'));
                 return false;
             });
+            function is_valid_dollar_amount(amount) {
+                //fixme put some validation here
+                return true
+            }
         </script>
     </body>
 </html>
