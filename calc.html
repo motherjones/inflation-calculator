@@ -3,14 +3,16 @@
         <script src="http://assets.motherjones.com/interactives/plugins/jquery/v1.7.1/jquery-1.7.1.min.js"></script>
     </head>
     <body>
-        <form id="paste_calculator">
-            <label for="request">Past Original Value/Year</label>
-            <textarea id="request" name="request" rows="20" cols="200">
-Original value | Original Year | New Year
-$xxxx.xx         19XX                20XX</textarea>
+        <form id="calculator">
+            <label for="year">Year</label>
+            <select id="year" value="year">
+            </select>
+            <label for="amount">Amount</label>
+            <input type="text" id="amount" name="amount">
+            </input>
             <input type="submit" value="Calculate"></input>
         </form>
-        <div id="paste_results"></div>
+        <div id="results"></div>
         <script type="application/javascript">
             var years_and_adjustment = {
                 '1913' : 23.4511111111111,
@@ -113,86 +115,47 @@ $xxxx.xx         19XX                20XX</textarea>
                 '2012' : 1.01120238333754  ,
                 '2013' : 1,
             };
-            var paste_form = jQuery('#paste_calculator');
-            var paste_results = jQuery('#paste_results');
-            var year_select = jQuery('#year_select');
+            var form = jQuery('#calculator');
+            var results = jQuery('#results');
+            var year_select = jQuery('#year');
             for (year in years_and_adjustment) {
                 year_select.append(
                     jQuery('<option value="' + year + '">' + year + '</option>')
                 );
             }
-            paste_form.on('submit', function() {
+
+
+            form.on('submit', function() {
                     // clear results
-                paste_results.html('');
-                
-                var request_block = jQuery('#request').val();
+                results.html('');
 
-                var requests = request_block.split(/\n/);
-
-                var result_array = [];
-                for (var i=0; i < requests.length; i++) {
-                    var request = requests[i]; 
-                    request = request.replace(/^\s*/, '').replace(/\s*$/, '');//trim
-                    request = requests[i].split(/\s+/);
-
-                    var error = '';
-                    if (request.length !== 3) {
-                        error = 'The format is amount, year, year.';
-                    } else {
-
-                        var dollar_amount = request[0].replace('$', '');
-                        if (!is_valid_dollar_amount(dollar_amount)) {
-                            error += request[0] + ' is not a valid $ amount.  ';
-                        }
-                        var from_year = request[1];
-                        if (!is_valid_year(from_year)) {
-                            error += request[1] + ' is not a valid year.  ';
-                        }
-
-                        var to_year = request[2];
-                        if (!is_valid_year(to_year)) {
-                            error += request[2] + ' is not a valid year.';
-                        }
-                    }
-
-                    if (error) {
-                        request.push('<span class="error">' 
-                                + error + '</span>');
-                    } else {
-                        request.push( 
-                            get_adjusted_dollars(dollar_amount, from_year, to_year) 
-                        );
-                    }
-
-                    result_array.push(request);
+                var val = parseFloat(jQuery('#amount').val());
+                if ( !is_valid_dollar_amount(val) ) {
+                    results.append('<h3 class="error">Let\'s try to keep this at numerals, okay? Maybe a decimal point.</h3>');
+                    return false;
                 }
+                var year = year_select.find('option:selected').val();
 
-                display_paste_results(result_array);
+
+                results.append(jQuery('<h1>$' + val +
+                    ' in ' + year + ' dollars, is worth:</h1>'));
+
+                var list = jQuery('<ul></ul>');
+                for (adjusted_year in years_and_adjustment) {
+                    var adjusted_amount = get_adjusted_dollars(val, year, adjusted_year);
+                    list.append(jQuery('<li>$' + adjusted_amount
+                        + ' in ' + adjusted_year + '</li>'));
+                }
+                results.append(list);
 
                 return false;
             });
+
             function is_valid_dollar_amount(amount) {
-                if (amount.match(/[^[0-9]e\.]/)) {
+                if (!amount || amount === NaN) {
                     return false;
-                }
-                var parsed = parseFloat(amount);
-                if (!parsed) {
-                    return false;
-                }
-                if (parsed.toString().match(/\./)) {
-                    return (parsed.toString().split('.')[1].length < 3);
                 }
                 return true
-            }
-            function is_valid_year(year) {
-                if (year.match(/[^0-9]/)) {
-                    return false;
-                }
-                var yearInt = parseInt(year);
-                if (!yearInt) {
-                    return false;
-                }
-                return (year.length === 4);
             }
 
             function get_adjusted_dollars(amount, from, to) {
@@ -203,19 +166,6 @@ $xxxx.xx         19XX                20XX</textarea>
                 return new_amount;
             }
 
-            function display_results(results_array) {
-                var table = jQuery('<table></table>');
-                table.append('<thead><tr><th>Amount<th>From</th><th>To</th><th>Result</th></tr></thead>');
-                for (var i=0; i < results_array.length; i++) {
-                    var result = results_array[i];
-                    table.append('<tr><td>' + result[0] + '</td>'
-                            + '<td>' + result[1] + '</td>'
-                            + '<td>' + result[2] + '</td>'
-                            + '<td>$' + result[3] + '</td>'
-                            + '</tr>');
-                }
-                paste_results.append(table);
-            }
         </script>
     </body>
 </html>
